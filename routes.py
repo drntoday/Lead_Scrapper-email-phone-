@@ -156,3 +156,65 @@ def extract_leads():
         
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@main.route('/api/validate/email', methods=['POST'])
+def validate_single_email():
+    data = request.get_json()
+    email = data.get('email')
+    lead_id = data.get('lead_id')
+    
+    if not email:
+        return jsonify({'is_valid': False, 'reason': 'No email provided'}), 400
+    
+    from validators.email_validator import EmailValidator
+    
+    validator = EmailValidator()
+    result = validator.validate(email)
+    
+    if lead_id and result['is_valid']:
+        lead = Lead.query.get(lead_id)
+        if lead:
+            lead.confidence_score = result['confidence_score']
+            lead.verification_status = 'Verified'
+            lead.is_catch_all = result.get('is_catch_all', False)
+            db.session.commit()
+    
+    return jsonify(result)
+
+@main.route('/api/validate/all', methods=['POST'])
+def validate_all_leads():
+    from validators.email_validator import EmailValidator
+    
+    validator = EmailValidator()
+    unverified_leads = Lead.query.filter(
+        (Lead.verification_status != 'Verified') | (Lead.is_catch_all == True)
+    ).all()
+    
+    validated_count = 0
+    
+    for lead in unverified_leads:
+        try:
+            result = validator.validate(lead.email)
+            if result['is_valid']:
+                lead.confidence_score = result['confidence_score']
+                lead.verification_status = 'Verified'
+                lead.is_catch_all = result.get('is_catch_all', False)
+                validated_count += 1
+        except Exception:
+            continue
+    
+    db.session.commit()
+    
+    return jsonify({
+        'success': True,
+        'validated': validated_count,
+        'total_processed': len(unverified_leads)
+    })
+
+@main.route('/api/leads/clear', methods=['DELETE'])
+def clear_all_leads():
+    count = Lead.query.count()
+    Lead.query.delete()
+    db.session.commit()
+    return jsonify({'deleted': count})
