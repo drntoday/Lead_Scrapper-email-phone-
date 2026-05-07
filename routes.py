@@ -11,6 +11,14 @@ main = Blueprint('main', __name__)
 def index():
     return render_template('index.html')
 
+@main.route('/extract')
+def extract_page():
+    return render_template('extract.html')
+
+@main.route('/validate')
+def validate_page():
+    return render_template('validate.html')
+
 @main.route('/api/leads', methods=['GET'])
 def get_leads():
     page = request.args.get('page', 1, type=int)
