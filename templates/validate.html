@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-5">
+        <div class="card mb-3">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-check-circle"></i> Email Validation</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Single Email Check</label>
+                    <div class="input-group">
+                        <input type="email" class="form-control" id="singleEmail" 
+                               placeholder="test@example.com">
+                        <button class="btn btn-success" onclick="validateSingleEmail()">
+                            <i class="bi bi-check-lg"></i> Check
+                        </button>
+                    </div>
+                    <div id="singleEmailResult" class="mt-2"></div>
+                </div>
+                <hr>
+                <button class="btn btn-warning w-100 mb-2" onclick="validateAllUnverified()">
+                    <i class="bi bi-arrow-repeat"></i> Validate All Unverified Leads
+                </button>
+                <button class="btn btn-outline-danger w-100" onclick="clearAllLeads()">
+                    <i class="bi bi-trash"></i> Clear All Leads
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="bi bi-list-ul"></i> Validation Queue</h5>
+            </div>
+            <div class="card-body">
+                <div id="unverifiedList" style="max-height: 500px; overflow-y: auto;">
+                    <p class="text-muted">Loading unverified leads...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/validate.js') }}"></script>
+{% endblock %}
