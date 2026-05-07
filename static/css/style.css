@@ -1,0 +1,95 @@
+body {
+    background-color: #f5f6fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+    font-weight: 600;
+}
+
+.table th {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    vertical-align: middle;
+}
+
+.table td {
+    font-size: 13px;
+    vertical-align: middle;
+}
+
+.confidence-badge {
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+.confidence-high {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.confidence-medium {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.confidence-low {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.status-verified {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.status-unverified {
+    color: #ffc107;
+    font-weight: 600;
+}
+
+.status-catchall {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+#extractionLog {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.log-info { color: #17a2b8; }
+.log-success { color: #28a745; }
+.log-warning { color: #ffc107; }
+.log-error { color: #dc3545; }
+
+.page-item.active .page-link {
+    background-color: #343a40;
+    border-color: #343a40;
+}
+
+.btn-group .btn {
+    border-radius: 6px;
+    margin-right: 5px;
+}
+
+.pagination {
+    margin-top: 20px;
+}
