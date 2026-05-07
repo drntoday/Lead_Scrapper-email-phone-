@@ -90,3 +90,69 @@ def export_leads(format):
         filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'exports', filename)
         df.to_json(filepath, orient='records', indent=2)
         return send_file(filepath, as_attachment=True, download_name=filename, mimetype='application/json')
+
+
+@main.route('/api/extract', methods=['POST'])
+def extract_leads():
+    data = request.get_json()
+    
+    source_type = data.get('source_type')
+    search_query = data.get('search_query')
+    max_results = data.get('max_results', 50)
+    
+    if not source_type or not search_query:
+        return jsonify({'success': False, 'message': 'Missing required fields'}), 400
+    
+    leads_found = 0
+    leads_added = 0
+    errors = []
+    
+    try:
+        if source_type == 'google_maps':
+            from extractors.google_maps import GoogleMapsExtractor
+            extractor = GoogleMapsExtractor()
+            raw_leads = extractor.search(search_query, max_results)
+        elif source_type == 'directory':
+            from extractors.directory import DirectoryExtractor
+            extractor = DirectoryExtractor()
+            raw_leads = extractor.search(search_query, max_results)
+        elif source_type == 'website':
+            from extractors.website import WebsiteExtractor
+            extractor = WebsiteExtractor()
+            raw_leads = extractor.extract_from_url(search_query)
+        else:
+            return jsonify({'success': False, 'message': f'Unsupported source: {source_type}'}), 400
+        
+        leads_found = len(raw_leads)
+        
+        for lead_data in raw_leads:
+            try:
+                existing = Lead.query.filter_by(email=lead_data.get('email')).first()
+                if not existing and lead_data.get('email'):
+                    lead = Lead(
+                        first_name=lead_data.get('first_name'),
+                        last_name=lead_data.get('last_name'),
+                        company=lead_data.get('company'),
+                        job_title=lead_data.get('job_title'),
+                        email=lead_data.get('email'),
+                        phone=lead_data.get('phone'),
+                        source=source_type,
+                        confidence_score=30,
+                        verification_status='Unverified'
+                    )
+                    db.session.add(lead)
+                    leads_added += 1
+            except Exception as e:
+                errors.append(str(e))
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'leads_found': leads_found,
+            'leads_added': leads_added,
+            'errors': errors
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
