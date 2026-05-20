@@ -1,11 +1,14 @@
 from flask import Blueprint, render_template, jsonify, request, send_file
-from models import Lead
 from app import db
 import pandas as pd
 import os
 from datetime import datetime
 
 main = Blueprint('main', __name__)
+
+def get_lead_model():
+    from models import Lead
+    return Lead
 
 @main.route('/')
 def index():
@@ -21,6 +24,7 @@ def validate_page():
 
 @main.route('/api/leads', methods=['GET'])
 def get_leads():
+    Lead = get_lead_model()
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 50, type=int)
     sort_by = request.args.get('sort_by', 'created_at')
@@ -52,6 +56,7 @@ def get_leads():
 
 @main.route('/api/leads/count', methods=['GET'])
 def get_lead_count():
+    Lead = get_lead_model()
     total = Lead.query.count()
     verified = Lead.query.filter(Lead.verification_status == 'Verified').count()
     unverified = Lead.query.filter(Lead.verification_status == 'Unverified').count()
@@ -66,6 +71,7 @@ def get_lead_count():
 
 @main.route('/api/leads/export/<format>', methods=['GET'])
 def export_leads(format):
+    Lead = get_lead_model()
     if format not in ['csv', 'xlsx', 'json']:
         return jsonify({'error': 'Unsupported format'}), 400
     
@@ -102,6 +108,7 @@ def export_leads(format):
 
 @main.route('/api/extract', methods=['POST'])
 def extract_leads():
+    Lead = get_lead_model()
     data = request.get_json()
     
     source_type = data.get('source_type')
@@ -168,6 +175,7 @@ def extract_leads():
 
 @main.route('/api/validate/email', methods=['POST'])
 def validate_single_email():
+    Lead = get_lead_model()
     data = request.get_json()
     email = data.get('email')
     lead_id = data.get('lead_id')
@@ -192,6 +200,7 @@ def validate_single_email():
 
 @main.route('/api/validate/all', methods=['POST'])
 def validate_all_leads():
+    Lead = get_lead_model()
     from validators.email_validator import EmailValidator
     
     validator = EmailValidator()
@@ -222,6 +231,7 @@ def validate_all_leads():
 
 @main.route('/api/leads/clear', methods=['DELETE'])
 def clear_all_leads():
+    Lead = get_lead_model()
     count = Lead.query.count()
     Lead.query.delete()
     db.session.commit()
